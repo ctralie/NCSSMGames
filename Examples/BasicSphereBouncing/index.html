@@ -82,6 +82,12 @@
 	for (var i = 0; i < 100; i++){
         	shapes.push(new constructSphere(radius,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, smoothness,material,colShape));
     	}
+    	shapes.forEach(function(shape)
+        {
+        	addShape(shape,dynamicsWorld,scene);
+        	
+        });
+
 /*
 	//Rendering part of sphere
 	var geometry = new THREE.SphereGeometry( 0.1, 32, 32 ); 
