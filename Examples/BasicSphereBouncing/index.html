@@ -13,7 +13,7 @@
 	var scene = new THREE.Scene(); 
 	
 	//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-	var width = 640, height = 480;
+	var width = 640.0, height = 480;
 	var camera = new THREE.PerspectiveCamera( 75, width/height, 0.1, 1000 );
 	var renderer = new THREE.WebGLRenderer(); 
 	renderer.setSize( width, height ); 
@@ -75,8 +75,6 @@
 	        shape.mesh.position.z = trans.getOrigin().z() + shape.radius/2;
 	        shape.mesh.updateMatrix();
     	};
-	//var sphere1 = new constructSphere(radius,mass, 1,5,2.5, 0,0,0, smoothness,material,colShape);
-    	//addShape(sphere1, dynamicsWorld, scene);
 
     	var shapes = [];
 	for (var i = 0; i < 100; i++){
@@ -88,29 +86,6 @@
         	
         });
 
-/*
-	//Rendering part of sphere
-	var geometry = new THREE.SphereGeometry( 0.1, 32, 32 ); 
-	var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
-	var sphere = new THREE.Mesh( geometry, material );
-	//Physics part of sphere
-	//NOTE: You can use the same collision shape for different spheres that are
-	//the same size
-	var colShape = new Ammo.btSphereShape(0.1);
-	var startTransform = new Ammo.btTransform();
-	startTransform.setIdentity();
-	var mass = 1;
-	var isDynamic = (mass != 0);
-	var localInertia = new Ammo.btVector3(0, 0, 0);
-	if (isDynamic)
-		colShape.calculateLocalInertia(mass,localInertia);
-	startTransform.setOrigin(new Ammo.btVector3(2, 5, 2.5));
-	var myMotionState = new Ammo.btDefaultMotionState(startTransform);
-	var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
-	var sphereBody = new Ammo.btRigidBody(rbInfo);
-	sphereBody.setRestitution(0.9) //Make it bouncy!
-	dynamicsWorld.addRigidBody(sphereBody);
-*/	
 	//Rendering part of ground
 	var gmaterial = new THREE.MeshPhongMaterial( { color: 0x00ff00, shininess: 30 } );
 	var ggeometry = new THREE.BoxGeometry(50, 50, 50);	
@@ -127,32 +102,12 @@
 	var rbInfoGround = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertiaGround);
 	var groundBody = new Ammo.btRigidBody(rbInfoGround);
 	groundBody.setRestitution(0.9) //Make it bouncy!
-	dynamicsWorld.addRigidBody(groundBody);	
-	
-	//Rendering part of falling box
-	var bfmaterial = new THREE.MeshPhongMaterial( { color: 0x0000ff } );
-	var bfgeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);	
-	var box = new THREE.Mesh( bfgeometry, bfmaterial );
-	//Physics part of the falling box
-	var boxShape = new Ammo.btBoxShape(new Ammo.btVector3(0.5, 0.5, 0.5));
-	var boxTransform = new Ammo.btTransform();
-	boxTransform.setIdentity();
-	boxTransform.setOrigin(new Ammo.btVector3(0, 4, 0));	 
-	mass = 1;
-	boxShape.calculateLocalInertia(mass,localInertia);
-	var localInertiaBox = new Ammo.btVector3(1, 1, 1);
-	var boxMotionState = new Ammo.btDefaultMotionState(boxTransform);
-	var rbInfoBox = new Ammo.btRigidBodyConstructionInfo(mass, boxMotionState, boxShape, localInertiaBox);
-	var boxBody = new Ammo.btRigidBody(rbInfoBox);
-	boxBody.setRestitution(0.9) //Make it bouncy!
-	dynamicsWorld.addRigidBody(boxBody);		
+	dynamicsWorld.addRigidBody(groundBody);		
 	
 	
 	var trans = new Ammo.btTransform();
 	
-	//scene.add( sphere );
 	scene.add( ground );
-	//scene.add( box ); //Uncomment to put in box
 	
 	camera.position.z = 15;
 	camera.position.x = 5;
@@ -164,23 +119,7 @@
 		ground.position.y = trans.getOrigin().y() + 25;
 		ground.position.z = trans.getOrigin().z() + 25;
 		ground.updateMatrix();
-	/*	
-		sphereBody.getMotionState().getWorldTransform(trans);
-		sphere.position.x = trans.getOrigin().x() + 0.05;
-		sphere.position.y = trans.getOrigin().y() + 0.05;
-		sphere.position.z = trans.getOrigin().z() + 0.05;
-		sphere.updateMatrix();
-	*/
 		shapes.forEach(function(shape){moveSphere(shape,trans);});
-	
-		boxBody.getMotionState().getWorldTransform(trans);
-		//**This is how you do rotations
-		var q = trans.getRotation()
-		box.quaternion = THREE.Quaternion(q.x(), q.y(), q.z(), q.w())		
-		box.position.x = trans.getOrigin().x() + 0.25;//TODO: Box dimension/2 (an actual variable not the "magic number" 25)
-		box.position.y = trans.getOrigin().y() + 0.25;
-		box.position.z = trans.getOrigin().z() + 0.25;	
-		box.updateMatrix();
 		
 		requestAnimationFrame( render ); 
 		renderer.render(scene, camera);
