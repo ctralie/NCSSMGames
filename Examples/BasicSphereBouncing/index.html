@@ -57,6 +57,7 @@
 	        sphereBody.setRestitution(0.9); 
 	        this.mesh = sphere;
 	        this.body = sphereBody;
+	        this.radius = radius;
 	};  
 	var addShape = function(shape,dynamicsWorld,scene)
 	{
@@ -70,6 +71,7 @@
 	    shape.mesh.position.y = trans.getOrigin().y() + shape.radius/2;
 	    shape.mesh.position.z = trans.getOrigin().z() + shape.radius/2;
 	    shape.mesh.updateMatrix();
+	    //console.log("" + trans.getOrigin().x() + "  ,  " + shape.mesh.position.x);
     };
 
    	var shapes = [];
