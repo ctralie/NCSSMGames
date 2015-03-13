@@ -1,33 +1,26 @@
 <html>
 <head>
-<script src = "js/ammo.js"></script>
-<script src = "js/three.min.js"></script>
-</head>
-<body>
+<!--External Libraries!-->
+<script type = "text/javascript" src = "js/ammo.js"></script>
+<script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="js/webgl-utils.js"></script>
+<script type="text/javascript" src="js/numeric-1.2.6.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 
-<h1>Basic Three.js + Ammo Combination</h1>
+<!--My Scripts!-->
+<script src="GLCode.js"></script>
+<script src="ShapeMeshes.js"></script>
+
+</head>
+<body onload="webGLStart();" text = "white" bgcolor = "black">
+
+<h1>Basic WebGL + Ammo Combination</h1>
+
+<canvas id="MainGLCanvas" style="border: none;" width="800" height="600"></canvas>
+
 
 <script> 
-	/****STEP 1: Initialize rendering engine**///
-
-	var scene = new THREE.Scene(); 
-	
-	//var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-	var width = 640.0, height = 480;
-	var camera = new THREE.PerspectiveCamera( 75, width/height, 0.1, 1000 );
-	var renderer = new THREE.WebGLRenderer(); 
-	renderer.setSize( width, height ); 
-	document.body.appendChild( renderer.domElement ); 
-
-	//Add some lighting
-	var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-	scene.add( light );
-	// directional lighting
-	var directionalLight = new THREE.DirectionalLight(0xffffff);
-	directionalLight.position.set(1, 1, 1).normalize();
-	scene.add(directionalLight);	
-
-	/****STEP 2: Initialize physics engine**/
+	/****STEP 1: Initialize physics engine**/
 	 var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks...
 	var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
 	var overlappingPairCache = new Ammo.btDbvtBroadphase();
@@ -35,15 +28,11 @@
 	var dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	dynamicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
 
-	//****STEP 3: Define world geometry***//
-	var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
-	var mass = 1;
+	//****STEP 2: Define world geometry***//
 	var colShape = new Ammo.btSphereShape(0.1);
 	var radius = 0.5;
-	var smoothness = 32;
-	var constructSphere = function(radius,mass,x,y,z,v_x,v_y,v_z,smoothness,material,colShape)
+	var constructSphere = function(radius,mass,x,y,z,v_x,v_y,v_z,colShape)
 	{
-	        var sphere = new THREE.Mesh(new THREE.SphereGeometry( radius, smoothness,smoothness ), material );
 	        var startTransform = new Ammo.btTransform();
 	        startTransform.setIdentity();
 	        var isDynamic = (mass != 0);
@@ -55,14 +44,12 @@
 	        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
 	        var sphereBody = new Ammo.btRigidBody(rbInfo);
 	        sphereBody.setRestitution(0.9); 
-	        this.mesh = sphere;
 	        this.body = sphereBody;
 	        this.radius = radius;
 	};  
-	var addShape = function(shape,dynamicsWorld,scene)
+	var addShape = function(shape,dynamicsWorld)
 	{
 	        dynamicsWorld.addRigidBody(shape.body);
-	        scene.add(shape.mesh);
     };
     var moveSphere = function(shape,trans)
     {
@@ -75,19 +62,16 @@
     };
 
    	var shapes = [];
+   	var mass = 1;
 	for (var i = 0; i < 100; i++)
 	{
-		shapes.push(new constructSphere(radius,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, smoothness,material,colShape));
+		shapes.push(new constructSphere(radius,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, colShape));
 	}
 	shapes.forEach(function(shape)
     {
-		addShape(shape,dynamicsWorld,scene);
+		addShape(shape,dynamicsWorld);
     });
 
-	//Rendering part of ground
-	var gmaterial = new THREE.MeshPhongMaterial( { color: 0x00ff00, shininess: 30 } );
-	var ggeometry = new THREE.BoxGeometry(50, 50, 50);	
-	var ground = new THREE.Mesh( ggeometry, gmaterial );
 	//Physics part of the ground
 	var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(50, 50, 50));
 	var groundTransform = new Ammo.btTransform();
@@ -104,25 +88,6 @@
 	
 	
 	var trans = new Ammo.btTransform();
-	
-	scene.add( ground );
-	
-	camera.position.z = 15;
-	camera.position.x = 5;
-	
-	var render = function () {
-		dynamicsWorld.stepSimulation(1/60, 10);
-		groundBody.getMotionState().getWorldTransform(trans);
-		ground.position.x = trans.getOrigin().x() + 25;//TODO: Box dimension/2 (an actual variable not the "magic number" 25)
-		ground.position.y = trans.getOrigin().y() + 25;
-		ground.position.z = trans.getOrigin().z() + 25;
-		ground.updateMatrix();
-		shapes.forEach(function(shape){moveSphere(shape,trans);});
-		
-		requestAnimationFrame( render ); 
-		renderer.render(scene, camera);
-	}; 
-	render();
 
 	//TODO: De-allocate physics things at the appropriate time
 	 /* Ammo.destroy(collisionConfiguration);
