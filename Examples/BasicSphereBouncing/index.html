@@ -2,7 +2,7 @@
 <head>
 <!--External Libraries!-->
 <script type = "text/javascript" src = "js/ammo.js"></script>
-<script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="js/gl-matrix.js"></script>
 <script type="text/javascript" src="js/webgl-utils.js"></script>
 <script type="text/javascript" src="js/numeric-1.2.6.min.js"></script>
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
@@ -10,6 +10,7 @@
 <!--My Scripts!-->
 <script src="GLCode.js"></script>
 <script src="ShapeMeshes.js"></script>
+<script src="WorldObjects.js"></script>
 
 </head>
 <body onload="webGLStart();" text = "white" bgcolor = "black">
@@ -17,86 +18,6 @@
 <h1>Basic WebGL + Ammo Combination</h1>
 
 <canvas id="MainGLCanvas" style="border: none;" width="800" height="600"></canvas>
-
-
-<script> 
-	/****STEP 1: Initialize physics engine**/
-	 var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks...
-	var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
-	var overlappingPairCache = new Ammo.btDbvtBroadphase();
-	var solver = new Ammo.btSequentialImpulseConstraintSolver();
-	var dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-	dynamicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
-
-	//****STEP 2: Define world geometry***//
-	var colShape = new Ammo.btSphereShape(0.1);
-	var radius = 0.5;
-	var constructSphere = function(radius,mass,x,y,z,v_x,v_y,v_z,colShape)
-	{
-	        var startTransform = new Ammo.btTransform();
-	        startTransform.setIdentity();
-	        var isDynamic = (mass != 0);
-	        var localInertia = new Ammo.btVector3(v_x,v_y,v_z);
-	        if (isDynamic)
-	            colShape.calculateLocalInertia(mass,localInertia);
-	        startTransform.setOrigin(new Ammo.btVector3(x,y,z));
-	        var myMotionState = new Ammo.btDefaultMotionState(startTransform);
-	        var rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, colShape, localInertia);
-	        var sphereBody = new Ammo.btRigidBody(rbInfo);
-	        sphereBody.setRestitution(0.9); 
-	        this.body = sphereBody;
-	        this.radius = radius;
-	};  
-	var addShape = function(shape,dynamicsWorld)
-	{
-	        dynamicsWorld.addRigidBody(shape.body);
-    };
-    var moveSphere = function(shape,trans)
-    {
-	shape.body.getMotionState().getWorldTransform(trans);
-	    shape.mesh.position.x = trans.getOrigin().x() + shape.radius/2;
-	    shape.mesh.position.y = trans.getOrigin().y() + shape.radius/2;
-	    shape.mesh.position.z = trans.getOrigin().z() + shape.radius/2;
-	    shape.mesh.updateMatrix();
-	    //console.log("" + trans.getOrigin().x() + "  ,  " + shape.mesh.position.x);
-    };
-
-   	var shapes = [];
-   	var mass = 1;
-	for (var i = 0; i < 100; i++)
-	{
-		shapes.push(new constructSphere(radius,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, colShape));
-	}
-	shapes.forEach(function(shape)
-    {
-		addShape(shape,dynamicsWorld);
-    });
-
-	//Physics part of the ground
-	var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(50, 50, 50));
-	var groundTransform = new Ammo.btTransform();
-	groundTransform.setIdentity();
-	groundTransform.setOrigin(new Ammo.btVector3(-25, -56, 0));	 
-	mass = 0;
-	isDynamic = mass !== 0;
-	var localInertiaGround = new Ammo.btVector3(0, 0, 0);
-	var myMotionState = new Ammo.btDefaultMotionState(groundTransform);
-	var rbInfoGround = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertiaGround);
-	var groundBody = new Ammo.btRigidBody(rbInfoGround);
-	groundBody.setRestitution(0.9) //Make it bouncy!
-	dynamicsWorld.addRigidBody(groundBody);		
-	
-	
-	var trans = new Ammo.btTransform();
-
-	//TODO: De-allocate physics things at the appropriate time
-	 /* Ammo.destroy(collisionConfiguration);
-	  Ammo.destroy(dispatcher);
-	  Ammo.destroy(overlappingPairCache);
-	  Ammo.destroy(solver);*/
-
-	</script>
-
 
 
 </body>

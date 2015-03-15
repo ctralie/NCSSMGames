@@ -1,19 +1,8 @@
 var gl;
 var glcanvas;
 
-function initGL(canvas) {
-    try {
-        gl = canvas.getContext("experimental-webgl");
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
-    } catch (e) {
-    }
-    if (!gl) {
-        alert("Could not initialise WebGL, sorry :-(.  Try a new version of chrome or firefox and make sure your newest graphics drivers are installed");
-    }
-}
 
-
+///*****SHADER INITIALIZATION CODE*****///
 //Type 0: Fragment shader, Type 1: Vertex Shader
 function getShader(gl, filename, type) {
     var shadersrc = "";
@@ -29,6 +18,7 @@ function getShader(gl, filename, type) {
         return null;
     }
 
+    //TODO: Get rid of synchronous mode
     $.ajax({
         async: false,
         url: filename,
@@ -78,29 +68,7 @@ function initShaders() {
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
 
-
-var mvMatrix = mat4.create();
-var mvMatrixStack = [];
-var pMatrix = mat4.create();
-
-function mvPushMatrix() {
-    var copy = mat4.create();
-    mat4.set(mvMatrix, copy);
-    mvMatrixStack.push(copy);
-}
-
-function mvPopMatrix() {
-    if (mvMatrixStack.length == 0) {
-        throw "Invalid popMatrix!";
-    }
-    mvMatrix = mvMatrixStack.pop();
-}
-
-function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-}
-
+///*****MOUSE INTERACTION CODE*****///
 function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
@@ -150,15 +118,21 @@ function clickerDragged(evt) {
 var theta = -Math.PI/2;
 var phi = Math.PI/2;
 var camCenter = [0.0, 0.0, 0.0];
-var camR = 5.0;
+var camR = 100.0;
 
+
+///*****VERTEX BUFFER INITIALIZTION*****///
 //Initializing sphere meshes
 var hemisphereVertexPosBuffer;
 var hemisphereTexCoordBuffer;
 var hemisphereIdxBuffer;
+var cubeVertexPosBuffer;
+var cubeTexCoordBuffer;
+var cubeIdxBuffer;
 function initGLBuffers() {
     console.log("Initializing buffers...");
     
+    //Hemisphere
     //Vertex Buffer
     hemisphereVertexPosBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereVertexPosBuffer);
@@ -179,10 +153,33 @@ function initGLBuffers() {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(HemiSphereIndices), gl.STATIC_DRAW);
     hemisphereIdxBuffer.itemSize = 1;
     hemisphereIdxBuffer.numItems = HemiSphereIndices.length;
+ 
+    //Cube
+    //Vertex Buffer
+    cubeVertexPosBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPosBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(CubeVertices), gl.STATIC_DRAW)
+    cubeVertexPosBuffer.itemSize = 3;
+    cubeVertexPosBuffer.numItems = SquareVertices.length/3;
     
+    //Texture coordinates buffer
+    cubeTexCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(CubeTexCoords), gl.STATIC_DRAW)
+    cubeTexCoordBuffer.itemSize = 2;
+    cubeTexCoordBuffer.numItems = SquareTexCoords.length/2;
+    
+    //Index buffer
+    cubeIdxBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIdxBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(CubeIndices), gl.STATIC_DRAW);
+    cubeIdxBuffer.itemSize = 1;
+
     requestAnimFrame(repaint);   
 }
 
+
+///*****TEXTURE BUFFER INITIALIZATION*****///
 function handleLoadedTexture(T) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture(gl.TEXTURE_2D, T);
@@ -190,26 +187,43 @@ function handleLoadedTexture(T) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 }
+
 var numberTexture;
-function initTexture() {
+var boxTexture;
+function initTextures() {
     var numberImage = new Image();
     numberTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, numberTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array([255, 0, 0, 255])); // red
     numberTexture.image = numberImage;
     numberImage.onload = function () {
         handleLoadedTexture(numberTexture)
     }
-    numberImage.src = "Number1.png";
+    numberImage.src = "Number1.gif";
+    
+    var boxImage = new Image();
+    boxTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array([255, 0, 0, 255])); // red
+    boxTexture.image = boxImage;
+    boxImage.onload = function () {
+        handleLoadedTexture(boxTexture)
+    }
+    boxImage.src = "box.jpg";
 }
 
-
+///*****DRAWING CODE*****///
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    //Step 1: Update the polar camera
+    var pMatrix = mat4.create();
+    //Step 1: Update the modelview matrix corresponding to the polar camera
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, camR/100.0, camR*2, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 
-    //mat4.identity(mvMatrix);
     var sinT = numeric.sin([theta])[0];
     var cosT = numeric.cos([theta])[0];
     var sinP = numeric.sin([phi])[0];
@@ -230,22 +244,53 @@ function drawScene() {
             mvMatrix.push(mvMatrix4x4[j][i]);
         }
     }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereVertexPosBuffer);
-    gl.vertexAttribPointer(shaderProgram.vPosAttrib, hemisphereVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereTexCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.texCoordAttrib, hemisphereTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, numberTexture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hemisphereIdxBuffer);
-    setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, hemisphereIdxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    //Render all of the shapes
+	shapes.forEach(function(shape) {
+		shape.render(shaderProgram, mvMatrix);
+    });
+    dynamicsWorld.stepSimulation(1/60, 10);
+    requestAnimFrame(repaint);
 }
 
 
 function repaint() {
     drawScene();
+}
+
+var shapes = [];
+var dynamicsWorld;
+//*****GL INITIALIZATION CODE*****//
+function initPhysics() {
+	/****STEP 1: Initialize physics engine**/
+	 var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks...
+	var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
+	var overlappingPairCache = new Ammo.btDbvtBroadphase();
+	var solver = new Ammo.btSequentialImpulseConstraintSolver();
+	dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+	dynamicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
+
+    //Add 100 random spheres and a box
+   	var mass = 1;
+	/*for (var i = 0; i < 100; i++) {
+		shapes.push(new SphereShape(SPHERE_RADIUS,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
+	}*/
+	shapes.push(new SphereShape(SPHERE_RADIUS,mass, 0,50,0, 0,0,0, sphereColShape, 0.9));
+	shapes.push(new BoxShape(50, 50, 50, 0, -30, 0, 0, 0, 0, 0, 0.9));
+	shapes.forEach(function(shape) {
+		dynamicsWorld.addRigidBody(shape.body);
+    });
+}
+
+function initGL(canvas) {
+    try {
+        gl = canvas.getContext("experimental-webgl");
+        gl.viewportWidth = canvas.width;
+        gl.viewportHeight = canvas.height;
+    } catch (e) {
+    }
+    if (!gl) {
+        alert("Could not initialise WebGL, sorry :-(.  Try a new version of chrome or firefox and make sure your newest graphics drivers are installed");
+    }
 }
 
 function webGLStart() {
@@ -260,10 +305,11 @@ function webGLStart() {
     glcanvas.addEventListener('touchend', releaseClick);
     glcanvas.addEventListener('touchmove', clickerDragged);
     
+    initPhysics();
     initGL(glcanvas);
     initShaders();
     initGLBuffers();
-    initTexture();
+    initTextures();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
