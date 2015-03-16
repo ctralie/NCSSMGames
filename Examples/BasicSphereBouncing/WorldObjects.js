@@ -1,4 +1,5 @@
-//This file holds information about the physics of objects in the scene
+//This file holds information about the physics of objects in the scene, and it connects
+//the physics to OpenGL through rendering functions
 
 //Global 
 var SPHERE_RADIUS = 2;
@@ -30,7 +31,6 @@ function SphereShape(radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
         gl.bindTexture(gl.TEXTURE_2D, numberTexture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hemisphereIdxBuffer);
-        gl.drawElements(gl.TRIANGLES, hemisphereIdxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         
         //Scale, translate, and rotate the sphere appropriately on top of whatever world transformation
         //has already been passed along in mvMatrix

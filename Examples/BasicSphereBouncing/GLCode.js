@@ -262,10 +262,10 @@ function drawScene() {
     //Step 1: Update the modelview matrix corresponding to the polar camera
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, camR/100.0, camR*2, pMatrix);
 
-    var sinT = numeric.sin([theta])[0];
-    var cosT = numeric.cos([theta])[0];
-    var sinP = numeric.sin([phi])[0];
-    var cosP = numeric.cos([phi])[0];
+    var sinT = Math.sin(theta);
+    var cosT = Math.cos(theta);
+    var sinP = Math.sin(phi);
+    var cosP = Math.cos(phi);
     var T = [-sinP*cosT, -cosP, sinP*sinT];
     var U = [-cosP*cosT, sinP, cosP*sinT];
     var R = [-sinT, 0, -cosT];
