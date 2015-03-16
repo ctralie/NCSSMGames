@@ -117,8 +117,8 @@ function clickerDragged(evt) {
 //Variables for polar camera
 var theta = -Math.PI/2;
 var phi = Math.PI/2;
-var camCenter = [0.0, 0.0, 0.0];
-var camR = 50.0;
+var camCenter = [0.0, 5.0, 0.0];
+var camR = 80.0;
 
 
 ///*****VERTEX BUFFER INITIALIZTION*****///
@@ -160,20 +160,21 @@ function initGLBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPosBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(CubeVertices), gl.STATIC_DRAW)
     cubeVertexPosBuffer.itemSize = 3;
-    cubeVertexPosBuffer.numItems = SquareVertices.length/3;
+    cubeVertexPosBuffer.numItems = CubeVertices.length/3;
     
     //Texture coordinates buffer
     cubeTexCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(CubeTexCoords), gl.STATIC_DRAW)
     cubeTexCoordBuffer.itemSize = 2;
-    cubeTexCoordBuffer.numItems = SquareTexCoords.length/2;
+    cubeTexCoordBuffer.numItems = CubeTexCoords.length/2;
     
     //Index buffer
     cubeIdxBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIdxBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(CubeIndices), gl.STATIC_DRAW);
     cubeIdxBuffer.itemSize = 1;
+    cubeIdxBuffer.numItems = CubeIndices.length;
 
     requestAnimFrame(repaint);   
 }
@@ -190,6 +191,7 @@ function handleLoadedTexture(T) {
 
 var numberTexture;
 var boxTexture;
+var floorTexture;
 function initTextures() {
     var numberImage = new Image();
     numberTexture = gl.createTexture();
@@ -202,16 +204,27 @@ function initTextures() {
     }
     numberImage.src = "Number1.gif";
     
-    var boxImage = new Image();
-    boxTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+    var crateImage = new Image();
+    crateTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, crateTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
         new Uint8Array([255, 0, 0, 255])); // red
-    boxTexture.image = boxImage;
-    boxImage.onload = function () {
-        handleLoadedTexture(boxTexture);
+    crateTexture.image = crateImage;
+    crateImage.onload = function () {
+        handleLoadedTexture(crateTexture);
     }
-    boxImage.src = "box.gif";
+    crateImage.src = "crate.gif";
+    
+    var floorImage = new Image();
+    floorTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array([255, 0, 0, 255])); // red
+    floorTexture.image = floorImage;
+    floorImage.onload = function () {
+        handleLoadedTexture(floorTexture);
+    }
+    floorImage.src = "floor.gif";
 }
 
 
@@ -298,12 +311,11 @@ function initPhysics() {
 
     //Add 100 random spheres and a box
    	var mass = 1;
-	for (var i = 0; i < 10; i++) {
-		shapes.push(new SphereShape(SPHERE_RADIUS, mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
-		shapes.push(new BoxShape(2, 2, 2, mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, 0.9));
+	for (var i = 0; i < 30; i++) {
+		shapes.push(new SphereShape(SPHERE_RADIUS, mass, Math.random()*50-25,20+20*Math.random(),Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
+		//shapes.push(new BoxShape(2, 2, 2, mass, Math.random()*50-25,25+10*Math.random(),Math.random()*50-25, 0,0,0, 0.9, 0));
 	}
-	//shapes.push(new SphereShape(SPHERE_RADIUS, mass, 0,40,0, 0,0,0, sphereColShape, 0.9));
-	shapes.push(new BoxShape(50, 50, 50, 0, -50, 0, 0, 0, 0, 0, 0.9));
+	shapes.push(new BoxShape(50, 50, 50, 0, -50, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
 	shapes.forEach(function(shape) {
 		dynamicsWorld.addRigidBody(shape.body);
     });

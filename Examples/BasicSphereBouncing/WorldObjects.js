@@ -68,20 +68,20 @@ function SphereShape(radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
 }
 
 
-function BoxShape(XLen, YLen, ZLen, cx, cy, cz, v_x, v_y, v_z, mass, restitution) {
+function BoxShape(XLenHalf, YLenHalf, ZLenHalf, cx, cy, cz, v_x, v_y, v_z, mass, restitution, isFloor) {
     //Physics part of the box
-    var boxShape = new Ammo.btBoxShape(new Ammo.btVector3(XLen, YLen, ZLen));
-    this.XLenHalf = XLen/2.0;
-    this.YLenHalf = YLen/2.0;
-    this.ZLenHalf = ZLen/2.0;
-    var boxTransform = new Ammo.btTransform();
+    var boxShape = new Ammo.btBoxShape(new Ammo.btVector3(XLenHalf, YLenHalf, ZLenHalf));
+    this.XLenHalf = XLenHalf;
+    this.YLenHalf = YLenHalf;
+    this.ZLenHalf = ZLenHalf;
+    var boxTransform = new Ammo.btTransform(Ammo.btVector3(this.XLenHalf, this.YLenHalf, this.ZLenHalf));
     boxTransform.setIdentity();
     boxTransform.setOrigin(new Ammo.btVector3(cx, cy, cz));	 
     var isDynamic = (mass != 0);
-    var localInertia; 
+    var localInertia;
     if (isDynamic) {
         localInertia = new Ammo.btVector3(v_x,v_y,v_z);
-        colShape.calculateLocalInertia(mass,localInertia);
+        boxShape.calculateLocalInertia(mass,localInertia);
     }
     else {
         localInertia = new Ammo.btVector3(0, 0, 0);
@@ -91,13 +91,19 @@ function BoxShape(XLen, YLen, ZLen, cx, cy, cz, v_x, v_y, v_z, mass, restitution
     var boxBody = new Ammo.btRigidBody(rbInfobox);
     boxBody.setRestitution(restitution);
     this.body = boxBody;
+    this.isFloor = isFloor;
     this.render = function(shaderProgram) {
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPosBuffer);
         gl.vertexAttribPointer(shaderProgram.vPosAttrib, cubeVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
         gl.vertexAttribPointer(shaderProgram.texCoordAttrib, cubeTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+        gl.activeTexture(gl.TEXTURE0);
+        if (this.isFloor == 0) {
+            gl.bindTexture(gl.TEXTURE_2D, crateTexture);
+        }
+        else {
+            gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+        }
         gl.uniform1i(shaderProgram.samplerUniform, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIdxBuffer);
 
