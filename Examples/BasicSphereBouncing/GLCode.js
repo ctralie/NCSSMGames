@@ -118,7 +118,7 @@ function clickerDragged(evt) {
 var theta = -Math.PI/2;
 var phi = Math.PI/2;
 var camCenter = [0.0, 0.0, 0.0];
-var camR = 100.0;
+var camR = 50.0;
 
 
 ///*****VERTEX BUFFER INITIALIZTION*****///
@@ -198,7 +198,7 @@ function initTextures() {
         new Uint8Array([255, 0, 0, 255])); // red
     numberTexture.image = numberImage;
     numberImage.onload = function () {
-        handleLoadedTexture(numberTexture)
+        handleLoadedTexture(numberTexture);
     }
     numberImage.src = "Number1.gif";
     
@@ -209,20 +209,45 @@ function initTextures() {
         new Uint8Array([255, 0, 0, 255])); // red
     boxTexture.image = boxImage;
     boxImage.onload = function () {
-        handleLoadedTexture(boxTexture)
+        handleLoadedTexture(boxTexture);
     }
-    boxImage.src = "box.jpg";
+    boxImage.src = "box.gif";
 }
+
+
+///*****MATRICES*****///
+var mvMatrix = mat4.create();
+var mvMatrixStack = [];
+var pMatrix = mat4.create();
+
+function mvPushMatrix() {
+    var copy = mat4.create();
+    mat4.set(mvMatrix, copy);
+    mvMatrixStack.push(copy);
+}
+
+function mvPopMatrix() {
+    if (mvMatrixStack.length == 0) {
+        throw "Invalid popMatrix!";
+    }
+    mvMatrix = mvMatrixStack.pop();
+}
+
+function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+}
+
 
 ///*****DRAWING CODE*****///
 function drawScene() {
+    dynamicsWorld.stepSimulation(1.0/60.0, 10);
+    
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    var pMatrix = mat4.create();
     //Step 1: Update the modelview matrix corresponding to the polar camera
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, camR/100.0, camR*2, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
 
     var sinT = numeric.sin([theta])[0];
     var cosT = numeric.cos([theta])[0];
@@ -232,23 +257,25 @@ function drawScene() {
     var U = [-cosP*cosT, sinP, cosP*sinT];
     var R = [-sinT, 0, -cosT];
     var eye = [camCenter[0] - camR*T[0], camCenter[1] - camR*T[1], camCenter[2] - camR*T[2]];
-    rotMat = [[R[0], U[0], -T[0], 0], [R[1], U[1], -T[1], 0], [R[2], U[2], -T[2], 0], [0, 0, 0, 1]];
-    rotMat = numeric.transpose(rotMat);
-    transMat = [[1, 0, 0, -eye[0]], [0, 1, 0, -eye[1]], [0, 0, 1, -eye[2]], [0, 0, 0, 1]];
-    var mvMatrix4x4 = numeric.dot(rotMat, transMat);
-    mvMatrix = [];
-    var i = 0;
-    var j = 0;
-    for (i = 0; i < 4; i++) {
-        for (j = 0; j < 4; j++) {
-            mvMatrix.push(mvMatrix4x4[j][i]);
-        }
-    }
+	rotMat = [[R[0], U[0], -T[0], 0], [R[1], U[1], -T[1], 0], [R[2], U[2], -T[2], 0], [0, 0, 0, 1]];
+	rotMat = numeric.transpose(rotMat);
+	transMat = [[1, 0, 0, -eye[0]], [0, 1, 0, -eye[1]], [0, 0, 1, -eye[2]], [0, 0, 0, 1]];
+	var mvMatrix4x4 = numeric.dot(rotMat, transMat);
+	mvMatrix = [];
+	var i = 0;
+	var j = 0;
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			mvMatrix.push(mvMatrix4x4[j][i]);
+		}
+	}
+	/*mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, [0, 0, 0]);*/
+    
     //Render all of the shapes
 	shapes.forEach(function(shape) {
-		shape.render(shaderProgram, mvMatrix);
+		shape.render(shaderProgram);
     });
-    dynamicsWorld.stepSimulation(1/60, 10);
     requestAnimFrame(repaint);
 }
 
@@ -262,7 +289,7 @@ var dynamicsWorld;
 //*****GL INITIALIZATION CODE*****//
 function initPhysics() {
 	/****STEP 1: Initialize physics engine**/
-	 var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks...
+	 var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks according to the bullet documentation...
 	var dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration);
 	var overlappingPairCache = new Ammo.btDbvtBroadphase();
 	var solver = new Ammo.btSequentialImpulseConstraintSolver();
@@ -271,11 +298,12 @@ function initPhysics() {
 
     //Add 100 random spheres and a box
    	var mass = 1;
-	/*for (var i = 0; i < 100; i++) {
-		shapes.push(new SphereShape(SPHERE_RADIUS,mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
-	}*/
-	shapes.push(new SphereShape(SPHERE_RADIUS,mass, 0,50,0, 0,0,0, sphereColShape, 0.9));
-	shapes.push(new BoxShape(50, 50, 50, 0, -30, 0, 0, 0, 0, 0, 0.9));
+	for (var i = 0; i < 10; i++) {
+		shapes.push(new SphereShape(SPHERE_RADIUS, mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
+		shapes.push(new BoxShape(2, 2, 2, mass, Math.random()*50-25,Math.random()*50-25,Math.random()*50-25, 0,0,0, 0.9));
+	}
+	//shapes.push(new SphereShape(SPHERE_RADIUS, mass, 0,40,0, 0,0,0, sphereColShape, 0.9));
+	shapes.push(new BoxShape(50, 50, 50, 0, -50, 0, 0, 0, 0, 0, 0.9));
 	shapes.forEach(function(shape) {
 		dynamicsWorld.addRigidBody(shape.body);
     });
@@ -305,11 +333,11 @@ function webGLStart() {
     glcanvas.addEventListener('touchend', releaseClick);
     glcanvas.addEventListener('touchmove', clickerDragged);
     
-    initPhysics();
     initGL(glcanvas);
     initShaders();
     initGLBuffers();
     initTextures();
+    initPhysics();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
