@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--External Libraries!-->
+<script type = "text/javascript" src = "js/ammo.js"></script>
+<!--<script type="text/javascript" src="js/gl-matrix.js"></script>!-->
+<script type="text/javascript" src = "js/glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="js/webgl-utils.js"></script>
+<script type="text/javascript" src="js/numeric-1.2.6.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+
+<!--My Scripts!-->
+<script src="GLCode.js"></script>
+<script src="Mouse.js"></script>
+<script src="ShapeMeshes.js"></script>
+<script src="WorldObjects.js"></script>
+<!-- My views -->
+<script src="views/Intro.js"></script>
+<script src="views/StartMenu.js"></script>
+<script src="views/Game.js"></script>
+<script src="views/PauseMenu.js"></script>
+<script src="views/Instructions.js"></script>
+<script src="views/Scoreboard.js"></script>
+
+<!-- this needs to be the last script? -->
+<script src="GameInit.js"></script>
+
+</head>
+<body onload="webGLStart();" text = "white" bgcolor = "black">
+
+<h1>Basic WebGL + Ammo Combination</h1>
+
+<canvas id="MainGLCanvas" style="border: none;" width="800" height="600"></canvas>
+
+
+</body>
+</html>
