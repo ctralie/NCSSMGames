@@ -1,9 +1,20 @@
-var gl;
-var glcanvas;
+//*****GL INITIALIZATION CODE*****//
 
+function initGL(canvas) {
+    try {
+        gl = canvas.getContext("experimental-webgl");
+        gl.viewportWidth = canvas.width;
+        gl.viewportHeight = canvas.height;
+    } catch (e) {
+    }
+    if (!gl) {
+        alert("Could not initialise WebGL, sorry :-(.  Try a new version of chrome or firefox and make sure your newest graphics drivers are installed");
+    }
+}
 
 ///*****SHADER INITIALIZATION CODE*****///
 //Type 0: Fragment shader, Type 1: Vertex Shader
+var shaderProgram;
 function getShader(gl, filename, type) {
     var shadersrc = "";
     var shader;
@@ -38,9 +49,6 @@ function getShader(gl, filename, type) {
 
     return shader;
 }
-
-
-var shaderProgram;
 
 function initShaders() {
     var fragmentShader = getShader(gl, "./FragmentShader.glsl", "fragment");
@@ -129,6 +137,10 @@ function initGLBuffers() {
 
 
 ///*****TEXTURE BUFFER INITIALIZATION*****///
+var numberTexture;
+var boxTexture;
+var floorTexture;
+
 function handleLoadedTexture(T) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture(gl.TEXTURE_2D, T);
@@ -137,9 +149,6 @@ function handleLoadedTexture(T) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 }
 
-var numberTexture;
-var boxTexture;
-var floorTexture;
 function initTextures() {
     var numberImage = new Image();
     numberTexture = gl.createTexture();
@@ -176,7 +185,6 @@ function initTextures() {
     floorImage.src = "img/floor.gif";
 }
 
-
 ///*****MATRICES*****///
 var mvMatrix = mat4.create();
 var mvMatrixStack = [];
@@ -198,20 +206,4 @@ function mvPopMatrix() {
 function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-}
-
-
-
-//*****GL INITIALIZATION CODE*****//
-
-function initGL(canvas) {
-    try {
-        gl = canvas.getContext("experimental-webgl");
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
-    } catch (e) {
-    }
-    if (!gl) {
-        alert("Could not initialise WebGL, sorry :-(.  Try a new version of chrome or firefox and make sure your newest graphics drivers are installed");
-    }
 }

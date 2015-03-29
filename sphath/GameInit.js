@@ -5,10 +5,17 @@
     this contains webGLStart() which is called on load
 */
 
-//TODO where else are gl, and glcanvas declared?
+var gl;
 var glcanvas;
 
+var lastX; 
+var lastY;
+var dragging = false;
+var MOUSERATE = 0.005;
+
 // game related
+var prevState;
+var currentState;
 var gameState = { 
     Intro        :  new Intro,          // short introduction before start menu 
     StartMenu    :  new StartMenu,      // leads to game, scoreboard, or instructions
@@ -19,18 +26,65 @@ var gameState = {
     //Failure      :  new Failure         // a screen to display errors i guess?
 };
 
-var prevState;
-var currentState = gameState.Intro;
-
 function repaint() {
     currentState.render();
 }
 
+//*** MOUSE INTERACTION ***//
+function getMousePos(evt) {
+    var rect = glcanvas.getBoundingClientRect();
+    return {
+        X: evt.clientX - rect.left,
+        Y: evt.clientY - rect.top
+    };
+}
+function releaseClick(evt) {
+    evt.preventDefault();
+    dragging = false;
+    if (typeof currentState.releaseClick !== 'undefined') {
+        currentState.releaseClick(evt);
+    }
+    return false;
+} 
+
+function makeClick(evt) {
+    evt.preventDefault();
+    dragging = true;
+    if (typeof currentState.makeClick !== 'undefined') {
+        currentState.makeClick(evt);
+    }
+    return false;
+} 
+
+function clickerDragged(evt) {
+    evt.preventDefault();
+    var mousePos = getMousePos(evt);
+    var dx = mousePos.X - lastX;
+    var dy = mousePos.Y - lastY; 
+    lastX = mousePos.X; 
+    lastY = mousePos.Y;
+    if (dragging) {
+        if (typeof currentState.clickerDragged !== 'undefined') {
+            currentState.clickerDragged(evt,dx,dy);
+        }
+    }
+    return false;
+}
+
+
+//*** INIT ***//
 // <body onload="webGLStart();" text = "white" bgcolor = "black">
 function webGLStart() {
     glcanvas = document.getElementById("MainGLCanvas");
-    // moved mouse event listeners to Mouse.js
-    initMouse(glcanvas);
+
+    glcanvas.addEventListener('mousedown', makeClick     );
+    glcanvas.addEventListener('mouseup'  , releaseClick  );
+    glcanvas.addEventListener('mousemove', clickerDragged);
+    
+    //Support for mobile devices
+    glcanvas.addEventListener('touchstart', makeClick     );
+    glcanvas.addEventListener('touchend'  , releaseClick  );
+    glcanvas.addEventListener('touchmove' , clickerDragged);
 
     initGL(glcanvas);
     initShaders();
@@ -40,7 +94,8 @@ function webGLStart() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
-    // eventually change this to Intro or StartMenu
+    //currentState = gameState.Intro;
+    currentState = gameState.Instructions;
     currentState = gameState.Game;
     requestAnimFrame(repaint);
 }
