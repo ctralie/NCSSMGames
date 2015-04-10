@@ -90,6 +90,7 @@ function BoxShape(XLenHalf, YLenHalf, ZLenHalf, cx, cy, cz, v_x, v_y, v_z, mass,
     var rbInfobox = new Ammo.btRigidBodyConstructionInfo(mass, myMotionState, boxShape, localInertia);
     var boxBody = new Ammo.btRigidBody(rbInfobox);
     boxBody.setRestitution(restitution);
+    boxBody.setFriction(1.0)
     this.body = boxBody;
     this.isFloor = isFloor;
     this.render = function(shaderProgram) {
