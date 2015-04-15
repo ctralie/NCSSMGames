@@ -104,5 +104,4 @@ function ButtonShape(color, text, x, y, width, height) {
                 glRotatef(acos(angleCosine)*180/3.14,-1,0,0);   
           
     }
-
 }

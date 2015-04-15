@@ -144,23 +144,29 @@ var floorTexture;
 function handleLoadedTexture(T) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture(gl.TEXTURE_2D, T);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, T.image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureCanvas);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
+var canvasTexture;
 function initTextures() {
+    /*
     var numberImage = new Image();
     numberTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, numberTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
         new Uint8Array([255, 0, 0, 255])); // red
-    numberTexture.image = numberImage;
+    numberTexture.image = DrawText('1');
     numberImage.onload = function () {
-        handleLoadedTexture(numberTexture);
+        handleLoadedTexture(textureCanvas);
     }
     //numberImage.src = "Number1.gif";
-    numberImage.src = "img/BlueBall.gif";
+    */
+    canvasTexture = gl.createTexture();
+    handleLoadedTexture(canvasTexture, document.getElementById('textureCanvas'));
     
     var crateImage = new Image();
     crateTexture = gl.createTexture();
