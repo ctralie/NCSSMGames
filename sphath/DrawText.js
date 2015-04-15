@@ -1,16 +1,13 @@
-function DrawText() {
+function DrawText(text) {
     var canvasX, canvasY;
     var textX, textY;
-
-    var text = [];
-    var textToWrite = "1";
     
     var maxWidth = 256;
     
     var squareTexture = true;
     
     var textHeight = 56;
-    var textAlignment = 'Centre';
+    var textAlignment = "center";
     var textColour = '#333';
     var fontFamily = 'monospace';
     
@@ -19,8 +16,8 @@ function DrawText() {
     var canvas = document.getElementById('textureCanvas');
     var ctx = canvas.getContext('2d');
     
-	var canvasX = 64;
-	var canvasY = 64;
+	var canvasX = 128;
+	var canvasY = 128;
 
     canvas.width = canvasX;
     canvas.height = canvasY;
