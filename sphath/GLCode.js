@@ -153,7 +153,7 @@ function handleLoadedTexture(T) {
 
 var canvasTexture;
 function initTextures() {
-    /*
+    
     var numberImage = new Image();
     numberTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, numberTexture);
@@ -164,9 +164,6 @@ function initTextures() {
         handleLoadedTexture(textureCanvas);
     }
     //numberImage.src = "Number1.gif";
-    */
-    canvasTexture = gl.createTexture();
-    handleLoadedTexture(canvasTexture, document.getElementById('textureCanvas'));
     
     var crateImage = new Image();
     crateTexture = gl.createTexture();

@@ -19,20 +19,8 @@ function DrawText() {
     var canvas = document.getElementById('textureCanvas');
     var ctx = canvas.getContext('2d');
     
-    ctx.font = textHeight+"px "+fontFamily;
-    if (maxWidth && measureText(ctx, textToWrite) > maxWidth ) {
-        maxWidth = createMultilineText(ctx, textToWrite, maxWidth, text);
-        canvasX = getPowerOfTwo(maxWidth);
-    } else {
-        text.push(textToWrite);
-        canvasX = getPowerOfTwo(ctx.measureText(textToWrite).width);
-    }
-    canvasY = getPowerOfTwo(textHeight*(text.length+1)); 
-    if(squareTexture) {
-        (canvasX > canvasY) ? canvasY = canvasX : canvasX = canvasY;
-    }
-    document.getElementById('calculatedWidth').value = canvasX;
-    document.getElementById('calculatedHeight').value = canvasY;
+	var canvasX = 64;
+	var canvasY = 64;
 
     canvas.width = canvasX;
     canvas.height = canvasY;
