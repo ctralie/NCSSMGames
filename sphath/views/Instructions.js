@@ -5,7 +5,6 @@
     displays a help text and a button
         return
 
-    includes mouse listeners to exit
 */
 
 function Instructions() {
@@ -25,8 +24,6 @@ function Instructions() {
     this.render = function () {
         //TODO very broken!!
         // follwing the tutorial at http://webglfundamentals.org/webgl/lessons/webgl-image-processing.html
-        //animation loop stuff goes here
-        // all the code we had before.
         var texCoordLocation = gl.getAttribLocation(shaderProgram, "a_texCoord");
  
         // provide texture coordinates for the rectangle.

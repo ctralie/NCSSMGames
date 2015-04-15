@@ -12,9 +12,9 @@ function Game() {
     var theta = -Math.PI/2;
     var phi = Math.PI/2;
     var camCenter = [0.0, 5.0, 0.0];
-    var camR = 80.0;
+    var camR = 180.0;
     
-    var mass = 1;
+    var mass = 0.00001;
     var shapes = [];
     var now = new Date();
     
@@ -60,14 +60,25 @@ function Game() {
     //TODO not sure if this should be exposed?
     this.dynamicsWorld = dynamicsWorld;
     
-    //Add 100 random spheres and a box
-    for (var i = 0; i < 30; i++) {
-        shapes.push(new SphereShape(SPHERE_RADIUS, mass, Math.random()*50-25,20+20*Math.random(),Math.random()*50-25, 0,0,0, sphereColShape, 0.9));
+    var rand = function (x) {
+        return Math.random()*x-x/2;
     }
-    shapes.push(new BoxShape(50, 50, 50, 0, -50, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
+    //Add 100 random spheres and a box
+    var v = 100;
+    for (var i = 0; i < 30; i++) {
+        shapes.push(new SphereShape(SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
+    }
+    shapes.push(new BoxShape(50, 50, 50, 0, -100, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
+    shapes.push(new BoxShape(50, 50, 50, 0,  100, 0, 0, 0, 0, 0, 0.9, 1));//ceiling
+    shapes.push(new BoxShape(50, 50, 50, 0, 0, -100, 0, 0, 0, 0, 0.9, 1));//back
+    shapes.push(new BoxShape(50, 50, 50, -100, 0, 0, 0, 0, 0, 0, 0.9, 1));//left
+    shapes.push(new BoxShape(50, 50, 50,  100, 0, 0, 0, 0, 0, 0, 0.9, 1));//right
+    shapes.push(new BoxShape(50, 50, 50, 0, 0,  100, 0, 0, 0, 0, 0.9, 1));//front
     shapes.forEach(function(shape) {
         dynamicsWorld.addRigidBody(shape.body);
     });
+    // this makes the front box invisible
+    shapes.pop()
 
     //*** MOUSE INTERACTION ***//
     // to add click events specific to this view,

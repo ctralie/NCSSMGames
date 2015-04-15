@@ -14,7 +14,7 @@ var trans = new Ammo.btTransform();
 function SphereShape(radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
     var startTransform = new Ammo.btTransform();
     startTransform.setIdentity();
-    var isDynamic = (mass != 0);
+    var isDynamic = true;
     var localInertia = new Ammo.btVector3(v_x,v_y,v_z);
     if (isDynamic) {
         colShape.calculateLocalInertia(mass,localInertia);
