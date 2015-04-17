@@ -66,7 +66,7 @@ function Game() {
     //Add 100 random spheres and a box
     var v = 100;
     for (var i = 0; i < 30; i++) {
-        shapes.push(new SphereShape(SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
+        shapes.push(new SphereShape( Math.floor(Math.random()*10-1).toString(),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
     }
     shapes.push(new BoxShape(50, 50, 50, 0, -100, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
     shapes.push(new BoxShape(50, 50, 50, 0,  100, 0, 0, 0, 0, 0, 0.9, 1));//ceiling

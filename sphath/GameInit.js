@@ -16,15 +16,6 @@ var MOUSERATE = 0.005;
 // game related
 var prevState;
 var currentState;
-var gameState = { 
-    Intro        :  new Intro,          // short introduction before start menu 
-    StartMenu    :  new StartMenu,      // leads to game, scoreboard, or instructions
-    Game         :  new Game,           // main gameplay
-    PauseMenu    :  new PauseMenu,      // leads to instructions or the start menu
-    Scoreboard   :  new Scoreboard,     // scoreboard for only current session atm
-    Instructions :  new Instructions,   // game instructions
-    //Failure      :  new Failure         // a screen to display errors i guess?
-};
 
 function repaint() {
     currentState.render();
@@ -86,6 +77,7 @@ function webGLStart() {
     glcanvas.addEventListener('touchend'  , releaseClick  );
     glcanvas.addEventListener('touchmove' , clickerDragged);
 
+
     initGL(glcanvas);
     initShaders();
     initGLBuffers();
@@ -94,8 +86,17 @@ function webGLStart() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
+    var gameState = { 
+        Intro        :  new Intro,          // short introduction before start menu 
+        StartMenu    :  new StartMenu,      // leads to game, scoreboard, or instructions
+        Game         :  new Game,           // main gameplay
+        PauseMenu    :  new PauseMenu,      // leads to instructions or the start menu
+        Scoreboard   :  new Scoreboard,     // scoreboard for only current session atm
+        Instructions :  new Instructions,   // game instructions
+        //Failure      :  new Failure         // a screen to display errors i guess?
+    };
     //currentState = gameState.Intro;
-    currentState = gameState.Instructions;
+    //currentState = gameState.Instructions;
     currentState = gameState.Game;
     requestAnimFrame(repaint);
 }

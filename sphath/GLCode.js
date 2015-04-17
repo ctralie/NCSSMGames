@@ -137,9 +137,52 @@ function initGLBuffers() {
 
 
 ///*****TEXTURE BUFFER INITIALIZATION*****///
-var numberTexture;
 var boxTexture;
 var floorTexture;
+
+function DrawText(text) {
+    var canvasX, canvasY;
+    var textX, textY;
+    var maxWidth = 256;
+    var squareTexture = true;
+    var textHeight = 56;
+    var textAlignment = "center";
+    var textColour = '#333';
+    var fontFamily = 'monospace';
+    var backgroundColour = '#FFF';
+    var canvas = document.getElementById('textureCanvas');
+    var ctx = canvas.getContext('2d');
+	var canvasX = 128;
+	var canvasY = 128;
+    canvas.width = canvasX;
+    canvas.height = canvasY;
+    
+    switch(textAlignment) {
+        case "left":
+            textX = 0;
+            break;
+        case "center":
+            textX = canvasX/2;
+            break;
+        case "right":
+            textX = canvasX;
+            break;
+    }
+    textY = canvasY/2;
+    ctx.fillStyle = backgroundColour;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = textColour;
+    ctx.textAlign = textAlignment;
+    ctx.textBaseline = 'middle'; // top, middle, bottom
+    ctx.font = textHeight+"px "+fontFamily;
+    var offset = (canvasY - textHeight*(text.length+1)) * 0.5;
+    for(var i = 0; i < text.length; i++) {
+        if(text.length > 1) {
+            textY = (i+1)*textHeight + offset;
+        }
+        ctx.fillText(text[i], textX,  textY);
+    }
+}
 
 function handleTextTexture(T, textureCanvas) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -158,19 +201,19 @@ function handleLoadedTexture(T) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 }
-
-var canvasTexture;
-function initTextures() {
-    
+function initBallTexture(text) {
     var numberImage = new Image();
-    numberTexture = gl.createTexture();
+    var numberTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, numberTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
         new Uint8Array([255, 0, 0, 255])); // red
-    DrawText("6");
+    DrawText(text);
     handleTextTexture(numberTexture, document.getElementById('textureCanvas'));
     //numberImage.src = "Number1.gif";
-    
+    return numberTexture;
+}
+
+function initTextures() {
     var crateImage = new Image();
     crateTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, crateTexture);

@@ -11,7 +11,7 @@ var sphereColShape = new Ammo.btSphereShape(SPHERE_RADIUS);//Make one sphere col
 var trans = new Ammo.btTransform();
 
 //Shape Objects
-function SphereShape(radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
+function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
     var startTransform = new Ammo.btTransform();
     startTransform.setIdentity();
     var isDynamic = true;
@@ -26,13 +26,14 @@ function SphereShape(radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
     sphereBody.setRestitution(restitution); 
     this.body = sphereBody;
     this.radius = radius;
+    var texture = new initBallTexture(text);
     this.render = function(shaderProgram) {
         gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereVertexPosBuffer);
         gl.vertexAttribPointer(shaderProgram.vPosAttrib, hemisphereVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereTexCoordBuffer);
         gl.vertexAttribPointer(shaderProgram.texCoordAttrib, hemisphereTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, numberTexture);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hemisphereIdxBuffer);
         
