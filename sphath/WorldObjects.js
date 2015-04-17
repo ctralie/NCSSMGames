@@ -55,6 +55,7 @@ function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
         mat4.scale(S, [this.radius, this.radius, this.radius]);
         //Modelview matrix for top half of sphere: M = mvMatrix*T*R*S
         mvPushMatrix();
+        mat4.scale(S, [-1, 1, 1]);
         mvMatrix = mat4.multiply(mvMatrix, TR);
         mvMatrix = mat4.multiply(mvMatrix, S);
         setMatrixUniforms();
@@ -63,7 +64,7 @@ function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
         
         
         mvPushMatrix();
-        mat4.scale(S, [1, 1, -1]);//Bottom half needs to be flipped around the Z-axis
+        mat4.scale(S, [-1, 1, -1]);//Bottom half needs to be flipped around the Z-axis
         mvMatrix = mat4.multiply(mvMatrix, TR);
         mvMatrix = mat4.multiply(mvMatrix, S);
         setMatrixUniforms();
