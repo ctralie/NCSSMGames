@@ -27,14 +27,19 @@ function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
     this.body = sphereBody;
     this.radius = radius;
     var texture = new initBallTexture(text);
-    this.render = function(shaderProgram) {
+    this.render = function(sProg, ID) {
         gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereVertexPosBuffer);
-        gl.vertexAttribPointer(shaderProgram.vPosAttrib, hemisphereVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereTexCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.texCoordAttrib, hemisphereTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        gl.vertexAttribPointer(sProg.vPosAttrib, hemisphereVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        if (ID == -1) {
+		    gl.bindBuffer(gl.ARRAY_BUFFER, hemisphereTexCoordBuffer);
+		    gl.vertexAttribPointer(sProg.texCoordAttrib, hemisphereTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    gl.activeTexture(gl.TEXTURE0);
+		    gl.bindTexture(gl.TEXTURE_2D, texture);
+		    gl.uniform1i(sProg.samplerUniform, 0);
+        }
+        else {
+        	gl.uniform1f(sProg.IDUniform, ID);
+        }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, hemisphereIdxBuffer);
         
         //Scale, translate, and rotate the sphere appropriately on top of whatever world transformation
@@ -58,7 +63,7 @@ function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
         mat4.scale(S, [-1, 1, 1]);
         mvMatrix = mat4.multiply(mvMatrix, TR);
         mvMatrix = mat4.multiply(mvMatrix, S);
-        setMatrixUniforms();
+        setMatrixUniforms(sProg);
         gl.drawElements(gl.TRIANGLES, hemisphereIdxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         mvPopMatrix();
         
@@ -67,7 +72,7 @@ function SphereShape(text,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) {
         mat4.scale(S, [-1, 1, -1]);//Bottom half needs to be flipped around the Z-axis
         mvMatrix = mat4.multiply(mvMatrix, TR);
         mvMatrix = mat4.multiply(mvMatrix, S);
-        setMatrixUniforms();
+        setMatrixUniforms(sProg);
         gl.drawElements(gl.TRIANGLES, hemisphereIdxBuffer.numItems, gl.UNSIGNED_SHORT, 0);        
         mvPopMatrix();
     }
@@ -98,19 +103,24 @@ function BoxShape(XLenHalf, YLenHalf, ZLenHalf, cx, cy, cz, v_x, v_y, v_z, mass,
     boxBody.setRestitution(restitution);
     this.body = boxBody;
     this.isFloor = isFloor;
-    this.render = function(shaderProgram) {
+    this.render = function(sProg, ID) {
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPosBuffer);
-        gl.vertexAttribPointer(shaderProgram.vPosAttrib, cubeVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
-        gl.vertexAttribPointer(shaderProgram.texCoordAttrib, cubeTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.activeTexture(gl.TEXTURE0);
-        if (this.isFloor == 0) {
-            gl.bindTexture(gl.TEXTURE_2D, crateTexture);
+        gl.vertexAttribPointer(sProg.vPosAttrib, cubeVertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        if (ID == -1) {
+		    gl.bindBuffer(gl.ARRAY_BUFFER, cubeTexCoordBuffer);
+		    gl.vertexAttribPointer(sProg.texCoordAttrib, cubeTexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		    gl.activeTexture(gl.TEXTURE0);
+		    if (this.isFloor == 0) {
+		        gl.bindTexture(gl.TEXTURE_2D, crateTexture);
+		    }
+		    else {
+		        gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+		    }
+		    gl.uniform1i(sProg.samplerUniform, 0);
         }
         else {
-            gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+        	gl.uniform1f(sProg.IDUniform, ID);
         }
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIdxBuffer);
 
         //Scale, translate, and rotate the box appropriately on top of whatever world transformation
@@ -133,7 +143,7 @@ function BoxShape(XLenHalf, YLenHalf, ZLenHalf, cx, cy, cz, v_x, v_y, v_z, mass,
         mvPushMatrix();
         mvMatrix = mat4.multiply(mvMatrix, TR);
         mvMatrix = mat4.multiply(mvMatrix, S);
-        setMatrixUniforms();
+        setMatrixUniforms(sProg);
         gl.drawElements(gl.TRIANGLES, cubeIdxBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         mvPopMatrix();
     }

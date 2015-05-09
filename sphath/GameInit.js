@@ -11,6 +11,7 @@ var glcanvas;
 var lastX; 
 var lastY;
 var dragging = false;
+var justClicked = false;
 var MOUSERATE = 0.005;
 
 // game related
@@ -41,6 +42,7 @@ function releaseClick(evt) {
 function makeClick(evt) {
     evt.preventDefault();
     dragging = true;
+    justClicked = true;
     if (typeof currentState.makeClick !== 'undefined') {
         currentState.makeClick(evt);
     }

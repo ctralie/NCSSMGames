@@ -122,9 +122,11 @@ function Game() {
         }
         
         //Render all of the shapes
-        shapes.forEach(function(shape) {
-            shape.render(shaderProgram);
-        });
+        gl.useProgram(shaderIDProgram);
+        for (i = 0; i < shapes.length; i++) {
+            //shapes[i].render(shaderProgram, -1);
+            shapes[i].render(shaderIDProgram, i/255.0);
+        }
         requestAnimFrame(repaint);
     }
 }

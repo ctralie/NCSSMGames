@@ -15,6 +15,8 @@ function initGL(canvas) {
 ///*****SHADER INITIALIZATION CODE*****///
 //Type 0: Fragment shader, Type 1: Vertex Shader
 var shaderProgram;
+var shaderIDProgram;
+
 function getShader(gl, filename, type) {
     var shadersrc = "";
     var shader;
@@ -50,7 +52,9 @@ function getShader(gl, filename, type) {
     return shader;
 }
 
+
 function initShaders() {
+	//Ordinary texture shader
     var fragmentShader = getShader(gl, "./FragmentShader.glsl", "fragment");
     var vertexShader = getShader(gl, "./VertexShader.glsl", "vertex");
 
@@ -74,6 +78,27 @@ function initShaders() {
 
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    
+    //Index ID shader
+    var fragmentIDShader = getShader(gl, "./FragmentIDShader.glsl", "fragment");
+    var vertexIDShader = getShader(gl, "./VertexIDShader.glsl", "vertex");
+
+
+    shaderIDProgram = gl.createProgram();
+    gl.attachShader(shaderIDProgram, vertexIDShader);
+    gl.attachShader(shaderIDProgram, fragmentIDShader);
+    gl.linkProgram(shaderIDProgram);
+
+    if (!gl.getProgramParameter(shaderIDProgram, gl.LINK_STATUS)) {
+        alert("Could not initialise shaders");
+    }
+
+    shaderIDProgram.vPosAttrib = gl.getAttribLocation(shaderIDProgram, "vPos");
+    gl.enableVertexAttribArray(shaderIDProgram.vPosAttrib);
+
+    shaderIDProgram.pMatrixUniform = gl.getUniformLocation(shaderIDProgram, "uPMatrix");
+    shaderIDProgram.mvMatrixUniform = gl.getUniformLocation(shaderIDProgram, "uMVMatrix");
+    shaderIDProgram.IDUniform = gl.getUniformLocation(shaderIDProgram, "ID");
 }
 
 
@@ -255,7 +280,7 @@ function mvPopMatrix() {
     mvMatrix = mvMatrixStack.pop();
 }
 
-function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+function setMatrixUniforms(s) {
+    gl.uniformMatrix4fv(s.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(s.mvMatrixUniform, false, mvMatrix);
 }
