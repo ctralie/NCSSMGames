@@ -50,7 +50,8 @@ function SphereShape(number,radius,mass,x,y,z,v_x,v_y,v_z,colShape,restitution) 
         mat4.identity(TR);
         mat4.translate(TR, [x, y, z]);
         var quatMat = mat4.create();
-        quat4.toMat4([q.x(), q.y(), q.z(), q.w()], quatMat);
+        //quat4.toMat4([q.x(), q.y(), q.z(), q.w()], quatMat);
+        quat4.toMat4([0, 0, 0, 1], quatMat);
         TR = mat4.multiply(TR, quatMat);
         var S = mat4.create();
         mat4.identity(S);

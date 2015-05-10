@@ -127,19 +127,25 @@ function Game() {
         	//Render ID offscreen
         	gl.bindFramebuffer(gl.FRAMEBUFFER, pickingFramebuffer);
 			for (i = 0; i < shapes.length; i++) {
-				shapes[i].render(shaderProgram, i/255.0);
+				if (shapes[i] instanceof SphereShape) {
+					//Only picking the spheres
+					shapes[i].render(shaderProgram, (i+1)/255.0);
+				}
 			}
 			//Figure out what element was selected by loading the pixel that the
 			//user clicked on and looking at the red channel
 			gl.readPixels(lastX, glcanvas.height - lastY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-			var ID = pixels[0];
-			var selElem = document.getElementById("SelectedElem");
-			selElem.innerHTML = "ID = " + ID + ", Number = " + shapes[ID].number;
+			var ID = parseInt("" + pixels[0]) - 1;
+			if (ID > -1) {
+				var selElem = document.getElementById("SelectedElem");
+				selElem.innerHTML = "(" + lastX + "," + lastY + ") ID = " + ID + ", Number = " + shapes[ID].number;
+			}
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         	justClicked = false;
         }
         //Render all of the shapes
         for (i = 0; i < shapes.length; i++) {
+            //shapes[i].render(shaderProgram, i/255.0);
             shapes[i].render(shaderProgram, -1);
         }
         requestAnimFrame(repaint);
