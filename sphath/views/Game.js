@@ -18,6 +18,8 @@ function Game() {
     var shapes = [];
     var now = new Date();
     
+    var pixels = new Uint8Array(4);
+    
     function getElapsedTime() {
         // elapsed time since last call
         // in seconds
@@ -66,7 +68,7 @@ function Game() {
     //Add 100 random spheres and a box
     var v = 100;
     for (var i = 0; i < 30; i++) {
-        shapes.push(new SphereShape( Math.floor(Math.random()*10-1).toString(),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
+        shapes.push(new SphereShape( Math.floor(Math.random()*10-1),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
     }
     shapes.push(new BoxShape(50, 50, 50, 0, -100, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
     shapes.push(new BoxShape(50, 50, 50, 0,  100, 0, 0, 0, 0, 0, 0.9, 1));//ceiling
@@ -121,11 +123,24 @@ function Game() {
             }
         }
         
+        if (justClicked) {
+        	//Render ID offscreen
+        	gl.bindFramebuffer(gl.FRAMEBUFFER, pickingFramebuffer);
+			for (i = 0; i < shapes.length; i++) {
+				shapes[i].render(shaderProgram, i/255.0);
+			}
+			//Figure out what element was selected by loading the pixel that the
+			//user clicked on and looking at the red channel
+			gl.readPixels(lastX, glcanvas.height - lastY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+			var ID = pixels[0];
+			var selElem = document.getElementById("SelectedElem");
+			selElem.innerHTML = "ID = " + ID + ", Number = " + shapes[ID].number;
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        	justClicked = false;
+        }
         //Render all of the shapes
-        gl.useProgram(shaderIDProgram);
         for (i = 0; i < shapes.length; i++) {
-            //shapes[i].render(shaderProgram, -1);
-            shapes[i].render(shaderIDProgram, i/255.0);
+            shapes[i].render(shaderProgram, -1);
         }
         requestAnimFrame(repaint);
     }

@@ -15,7 +15,6 @@ function initGL(canvas) {
 ///*****SHADER INITIALIZATION CODE*****///
 //Type 0: Fragment shader, Type 1: Vertex Shader
 var shaderProgram;
-var shaderIDProgram;
 
 function getShader(gl, filename, type) {
     var shadersrc = "";
@@ -53,7 +52,7 @@ function getShader(gl, filename, type) {
 }
 
 
-function initShaders() {
+function initShaders(canvas) {
 	//Ordinary texture shader
     var fragmentShader = getShader(gl, "./FragmentShader.glsl", "fragment");
     var vertexShader = getShader(gl, "./VertexShader.glsl", "vertex");
@@ -78,28 +77,31 @@ function initShaders() {
 
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    
-    //Index ID shader
-    var fragmentIDShader = getShader(gl, "./FragmentIDShader.glsl", "fragment");
-    var vertexIDShader = getShader(gl, "./VertexIDShader.glsl", "vertex");
-
-
-    shaderIDProgram = gl.createProgram();
-    gl.attachShader(shaderIDProgram, vertexIDShader);
-    gl.attachShader(shaderIDProgram, fragmentIDShader);
-    gl.linkProgram(shaderIDProgram);
-
-    if (!gl.getProgramParameter(shaderIDProgram, gl.LINK_STATUS)) {
-        alert("Could not initialise shaders");
-    }
-
-    shaderIDProgram.vPosAttrib = gl.getAttribLocation(shaderIDProgram, "vPos");
-    gl.enableVertexAttribArray(shaderIDProgram.vPosAttrib);
-
-    shaderIDProgram.pMatrixUniform = gl.getUniformLocation(shaderIDProgram, "uPMatrix");
-    shaderIDProgram.mvMatrixUniform = gl.getUniformLocation(shaderIDProgram, "uMVMatrix");
-    shaderIDProgram.IDUniform = gl.getUniformLocation(shaderIDProgram, "ID");
+    shaderProgram.IDUniform = gl.getUniformLocation(shaderProgram, "ID");
 }
+
+//Used for offscreen rendering for picking
+//https://github.com/gpjt/webgl-lessons/blob/master/lesson16/index.html
+var pickingFramebuffer;
+var pickingTexture;
+function initPickingFramebuffer(canvas) {
+    pickingFramebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, pickingFramebuffer);
+    pickingFramebuffer.width = canvas.width;
+    pickingFramebuffer.height = canvas.height;
+    pickingTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, pickingTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, pickingFramebuffer.width, pickingFramebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    var renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, pickingFramebuffer.width, pickingFramebuffer.height);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, pickingTexture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
 
 
 ///*****VERTEX BUFFER INITIALIZTION*****///

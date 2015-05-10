@@ -43,6 +43,9 @@ function makeClick(evt) {
     evt.preventDefault();
     dragging = true;
     justClicked = true;
+    var mousePos = getMousePos(evt);
+    lastX = mousePos.X;
+    lastY = mousePos.Y;
     if (typeof currentState.makeClick !== 'undefined') {
         currentState.makeClick(evt);
     }
@@ -84,6 +87,7 @@ function webGLStart() {
     initShaders();
     initGLBuffers();
     initTextures();
+    initPickingFramebuffer(glcanvas);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
