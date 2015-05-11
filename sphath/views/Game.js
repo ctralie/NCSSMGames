@@ -69,6 +69,7 @@ function Game() {
     var v = 100;
     for (var i = 0; i < 30; i++) {
         shapes.push(new SphereShape( Math.floor(Math.random()*10-1),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
+		//shapes.push(new SphereShape( i,SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
     }
     shapes.push(new BoxShape(50, 50, 50, 0, -100, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
     shapes.push(new BoxShape(50, 50, 50, 0,  100, 0, 0, 0, 0, 0, 0.9, 1));//ceiling
@@ -126,6 +127,7 @@ function Game() {
         if (justClicked) {
         	//Render ID offscreen
         	gl.bindFramebuffer(gl.FRAMEBUFFER, pickingFramebuffer);
+        	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			for (i = 0; i < shapes.length; i++) {
 				if (shapes[i] instanceof SphereShape) {
 					//Only picking the spheres
