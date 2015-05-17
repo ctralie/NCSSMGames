@@ -261,7 +261,8 @@ function initTextures() {
     floorImage.onload = function () {
         handleLoadedTexture(floorTexture);
     }
-    floorImage.src = "img/floor.gif";
+    //floorImage.src = "img/floor.gif";
+    floorImage.src = "img/doge.jpg";
 }
 
 ///*****MATRICES*****///

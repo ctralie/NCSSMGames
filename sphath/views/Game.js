@@ -17,15 +17,39 @@ function Game() {
     var mass = 0.00001;
     var shapes = [];
     var now = new Date();
+    this.isPaused = true;
     
     var pixels = new Uint8Array(4);
+
+    //TODO make sure to free this
+    this.removeShape = function (index) {
+        // removes this object from rendering
+        if (typeof shapes[index] !== 'undefined'  )
+        {
+            dynamicsWorld.removeRigidBody(shapes[index].body);
+            shapes.splice(index,1);
+        }
+    }
+    this.pause = function () {
+        currentState.isPaused=!currentState.isPaused;
+        //TODO
+        var button = document.getElementById("pauseButton");
+        button.value = (currentState.isPaused)? "Start" : "Pause";
+    }
     
     function getElapsedTime() {
         // elapsed time since last call
         // in seconds
         var here = now;
         now = new Date();
-        return (now - here)/1000.0;
+        if (currentState.isPaused)
+        {
+            return 0;
+        }
+        else
+        {
+            return (now - here)/1000.0;
+        }
     }
         
     this.setDifficulty = function (Difficulty) {
@@ -57,6 +81,8 @@ function Game() {
     var overlappingPairCache = new Ammo.btDbvtBroadphase();
     var solver = new Ammo.btSequentialImpulseConstraintSolver();
     var dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfig);
+    
+    //dynamicsWorld.setGravity(new Ammo.btVector3(0, 0, 0));
     dynamicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
 
     //TODO not sure if this should be exposed?
@@ -68,7 +94,7 @@ function Game() {
     //Add 100 random spheres and a box
     var v = 100;
     for (var i = 0; i < 30; i++) {
-        shapes.push(new SphereShape( Math.floor(Math.random()*10-1),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
+        shapes.push(new SphereShape( Math.floor(Math.random()*10),SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
 		//shapes.push(new SphereShape( i,SPHERE_RADIUS, mass, rand(50),30+rand(20),rand(50), rand(v),rand(v),rand(v), sphereColShape, 0.9));
     }
     shapes.push(new BoxShape(50, 50, 50, 0, -100, 0, 0, 0, 0, 0, 0.9, 1));//The Floor
@@ -138,10 +164,12 @@ function Game() {
 			//user clicked on and looking at the red channel
 			gl.readPixels(lastX, glcanvas.height - lastY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 			var ID = parseInt("" + pixels[0]) - 1;
+            //TODO remobe dis if plz
 			if (ID > -1) {
 				var selElem = document.getElementById("SelectedElem");
 				selElem.innerHTML = "(" + lastX + "," + lastY + ") ID = " + ID + ", Number = " + shapes[ID].number;
 			}
+            currentState.removeShape(ID);
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         	justClicked = false;
         }
