@@ -21,6 +21,20 @@ function Game() {
     
     var pixels = new Uint8Array(4);
 
+    rule = 0;
+
+    var gameRules = [];
+
+    gameRules.push({'rule':'Multiples of 2',
+                    'check': var check = function(index) {
+                        if (shapes[index].number % 2 == 0)
+                        { return true; }
+                        return false;
+                    }};
+
+	var ruleText = document.getElementById("SelectedElem");
+    ruleText.innerHTML = currentState.gameRules[rule]['rule'];
+
     //TODO make sure to free this
     this.removeShape = function (index) {
         // removes this object from rendering
@@ -169,7 +183,8 @@ function Game() {
 				var selElem = document.getElementById("SelectedElem");
 				selElem.innerHTML = "(" + lastX + "," + lastY + ") ID = " + ID + ", Number = " + shapes[ID].number;
 			}
-            currentState.removeShape(ID);
+            if (gameRules[rule]['check'](ID))
+            { currentState.removeShape(ID); }
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         	justClicked = false;
         }
