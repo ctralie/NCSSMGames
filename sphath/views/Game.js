@@ -26,14 +26,19 @@ function Game() {
     var gameRules = [];
 
     gameRules.push({'rule':'Multiples of 2',
-                    'check': var check = function(index) {
+                    'check': function(index) {
+                        if (typeof( shapes[index]) == undefined) 
+                        {
+                            return false;
+                        }
                         if (shapes[index].number % 2 == 0)
                         { return true; }
                         return false;
-                    }};
+                        }
+                    });
 
 	var ruleText = document.getElementById("SelectedElem");
-    ruleText.innerHTML = currentState.gameRules[rule]['rule'];
+    ruleText.innerHTML = gameRules[rule]['rule'];
 
     //TODO make sure to free this
     this.removeShape = function (index) {
