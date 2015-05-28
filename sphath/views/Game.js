@@ -8,6 +8,8 @@
 function Game() {
     var difficulty = 1;
     var score = 0;
+    var showScore = document.getElementById("score");
+    showScore.innerHTML = score;
 
     var theta = -Math.PI/2;
     var phi = Math.PI/2;
@@ -27,17 +29,16 @@ function Game() {
 
     gameRules.push({'rule':'Multiples of 2',
                     'check': function(index) {
-                        if (typeof( shapes[index]) == undefined) 
+                        if (typeof( shapes[index] ) != "undefined") 
                         {
-                            return false;
+                            if (shapes[index].number % 2 == 0)
+                            { return true; }
                         }
-                        if (shapes[index].number % 2 == 0)
-                        { return true; }
                         return false;
                         }
                     });
 
-	var ruleText = document.getElementById("SelectedElem");
+	var ruleText = document.getElementById("currGameRule");
     ruleText.innerHTML = gameRules[rule]['rule'];
 
     //TODO make sure to free this
@@ -184,12 +185,15 @@ function Game() {
 			gl.readPixels(lastX, glcanvas.height - lastY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 			var ID = parseInt("" + pixels[0]) - 1;
             //TODO remobe dis if plz
-			if (ID > -1) {
+			/*if (ID > -1) {
 				var selElem = document.getElementById("SelectedElem");
 				selElem.innerHTML = "(" + lastX + "," + lastY + ") ID = " + ID + ", Number = " + shapes[ID].number;
-			}
-            if (gameRules[rule]['check'](ID))
-            { currentState.removeShape(ID); }
+			}*/
+            if (this.isPaused==false && gameRules[rule]['check'](ID))
+            {
+                currentState.removeShape(ID); score++;
+                showScore.innerHTML = score;
+            }
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         	justClicked = false;
         }
