@@ -8,6 +8,7 @@
 function Game() {
     var difficulty = 1;
     var score = 0;
+    var level = 1;
     var showScore = document.getElementById("score");
     showScore.innerHTML = score;
 
@@ -189,10 +190,22 @@ function Game() {
 				var selElem = document.getElementById("SelectedElem");
 				selElem.innerHTML = "(" + lastX + "," + lastY + ") ID = " + ID + ", Number = " + shapes[ID].number;
 			}*/
-            if (this.isPaused==false && gameRules[rule]['check'](ID))
+            if (this.isPaused==false)
             {
-                currentState.removeShape(ID); score++;
-                showScore.innerHTML = score;
+                if (gameRules[rule]['check'](ID))
+                {
+                    score++;
+                    showScore.innerHTML = score;
+                }
+                else
+                {
+                    if (score != 0)
+                    {
+                        score--;
+                        showScore.innerHTML = score;
+                    }
+                }
+                currentState.removeShape(ID);
             }
 			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         	justClicked = false;
@@ -204,4 +217,20 @@ function Game() {
         }
         requestAnimFrame(repaint);
     }
+
+    /*int count;
+    while (isPaused)
+    {
+        count = 0;
+        shapes.forEach(function(entry) {
+            if (gameRules[rule]['check'](entry)
+            { count++; }
+        }
+        if (count == 0)
+        {
+            this.isPaused = false;
+            level++;
+            window.alert("Level "+level);
+        }
+    }*/
 }
